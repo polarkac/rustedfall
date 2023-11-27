@@ -1,6 +1,7 @@
 mod objects;
 mod requests;
 pub mod cards;
+pub mod commands;
 
 use std::error::Error;
 

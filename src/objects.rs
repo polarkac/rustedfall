@@ -12,6 +12,7 @@ pub struct Card {
     scryfall_uri: String,
     flavor_text: Option<String>,
     card_faces: Option<Vec<CardFace>>,
+    all_parts: Option<Vec<RelatedCard>>,
 }
 
 impl Card {
@@ -27,12 +28,16 @@ impl Card {
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "= {} =\n", self.name)?;
-        write!(f, "- {} -\n", self.type_line)?;
-        if let Some(oracle) = &self.oracle_text {
-            write!(f, "{}", oracle)?;
-        }
-        if let Some(flavor) = &self.flavor_text {
-            write!(f, "\n\"{}\"", flavor)?;
+        if let Some(card_faces) = &self.card_faces {
+            card_faces.iter().for_each(|face| write!(f, "{}\n", face).unwrap());
+        } else {
+            write!(f, "- {} -\n", self.type_line)?;
+            if let Some(oracle) = &self.oracle_text {
+                write!(f, "{}", oracle)?;
+            }
+            if let Some(flavor) = &self.flavor_text {
+                write!(f, "\n\"{}\"", flavor)?;
+            }
         }
 
         Ok(())
@@ -47,20 +52,64 @@ pub struct CardFace {
     flavor_text: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct RelatedCard {}
+impl fmt::Display for CardFace {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "= {} =\n", self.name)?;
+        write!(f, "- {} -\n", self.type_line)?;
+        if let Some(oracle) = &self.oracle_text {
+            write!(f, "{}", oracle)?;
+        }
+        if let Some(flavor) = &self.flavor_text {
+            write!(f, "\n\"{}\"", flavor)?;
+        }
+
+        Ok(())
+    }
+}
 
 #[derive(Serialize, Deserialize)]
-pub struct Ruling {}
+pub struct RelatedCard {
+    id: String,
+    component: String,
+    name: String,
+    type_line: String,
+    uri: String,
+}
+
+impl fmt::Display for RelatedCard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Related: {}", self.uri)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Ruling {
+    oracle_id: String,
+    source: String,
+    published_at: String,
+    commend: String,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct CardSymbol {}
 
-#[derive(Deserialize, Serialize)]
-pub struct List {
-    next_page: String,
-    pub total_cards: u32,
-    warnings: Vec<String>,
+#[derive(Serialize, Deserialize)]
+pub struct List<T> {
+    data: Vec<T>,
+    has_more: bool,
+    next_page: Option<String>,
+    total_cards: Option<u32>,
+    warnings: Option<Vec<String>>,
+}
+
+impl<T> List<T> {
+    pub fn data(&self) -> &Vec<T> {
+        &self.data
+    }
+
+    pub fn total_cards(&self) -> Option<u32> {
+        self.total_cards
+    }
 }
 
 #[derive(Serialize, Deserialize)]

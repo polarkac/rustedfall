@@ -14,6 +14,7 @@ name = "rustedfall"
 path = "src/main.rs"
 
 [dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
 reqwest = { version = "0.11.22", features = ["blocking", "json"] }
 serde = { version = "1.0.166", features = ["derive"] }
 serde_json = { version = "1.0.108" }
